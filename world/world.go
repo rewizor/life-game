@@ -1,11 +1,61 @@
 package world
 
-const x_world_size uint = 15
-const y_world_size uint = 30
+import "fmt"
+
+const x_world_size uint = 50
+const y_world_size uint = 50
 
 //----------------------------------->
 type World struct {
 	Maps [x_world_size][y_world_size]int8
+}
+
+//----------------------------------->
+func PrintWorld(w World) {
+	var line string = ""
+	for x, element := range w.Maps {
+		line = ""
+		for y := range element {
+			if w.Maps[x][y] == 0 {
+				line += " "
+			} else {
+				line += "@"
+			}
+		}
+		fmt.Println(line)
+	}
+}
+
+//----------------------------------->
+func NextGeneration(wormWorld World, tmpWormWorld World, newWormWorld *World) {
+	for x, element := range tmpWormWorld.Maps {
+		for y := range element {
+			switch tmpWormWorld.Maps[x][y] {
+
+			case 2:
+				//life
+				newWormWorld.Maps[x][y] = wormWorld.Maps[x][y]
+			case 3:
+				//newborn
+				newWormWorld.Maps[x][y] = 1
+			default:
+				//death
+				newWormWorld.Maps[x][y] = 0
+			}
+		}
+
+	}
+}
+
+//----------------------------------->
+func SumNeigbours(currentWorld World, sumWorld *World) {
+	for x, element := range currentWorld.Maps {
+		for y := range element {
+			sumWorld.Maps[x][y] = CheckWormNeigbours(int(x), int(y), currentWorld)
+		}
+
+	}
+
 }
 
 //----------------------------------->
