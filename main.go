@@ -22,17 +22,25 @@ func main() {
 	cls()
 
 	var swiat worm.World
-	//var swiat_ng worm.World
+	var worm worm.Worm
 
-	swiat.PutWormToWorld(worm.NewWorm(2, 1, -1))
-	swiat.PutWormToWorld(worm.NewWorm(2, 2, -1))
-	swiat.PutWormToWorld(worm.NewWorm(2, 3, -1))
+	worm.NewWorm(25, 5, &swiat)
+	worm.NewWorm(25, 6, &swiat)
+	worm.NewWorm(25, 7, &swiat)
+	worm.NewWorm(25, 8, &swiat)
+	worm.NewWorm(25, 9, &swiat)
+	worm.NewWorm(25, 10, &swiat)
+	worm.NewWorm(25, 11, &swiat)
+	worm.NewWorm(25, 12, &swiat)
+	worm.NewWorm(25, 13, &swiat)
+	worm.NewWorm(25, 14, &swiat)
 
-	for i := 0; i < 10; i++ {
+	for i := 1; i <= 40; i++ {
 		swiat.PrintWorld()
 		fmt.Println("Generation : ", i)
-		swiat = swiat.NextGeneration()
 		time.Sleep(1 * time.Second)
+		swiat.SumNeighbours()
+		swiat.NextGeneration()
 	}
 
 }

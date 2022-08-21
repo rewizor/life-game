@@ -2,17 +2,14 @@ package worm
 
 import (
 	"fmt"
-	"log"
-	"strconv"
-	"time"
 )
 
-const x_world_size uint = 5
-const y_world_size uint = 5
+const x_world_size uint = 50
+const y_world_size uint = 50
 
 // ----------------------------------->
 type Worm struct {
-	x, y       int
+	//x, y       int
 	neighbours int8 //if -1 state need to be calculate
 	live       bool
 }
@@ -23,8 +20,95 @@ type World struct {
 }
 
 // ----------------------------------->
-// ----------------------------------->   WORLD
+func (w *World) NextGeneration() {
+	for x, row := range w.Sheet {
+		for y, _ := range row {
+			if w.Sheet[x][y].neighbours < 2 {
+				w.Sheet[x][y].KillWorm()
+			}
+			if w.Sheet[x][y].neighbours > 3 {
+				w.Sheet[x][y].KillWorm()
+			}
+			if w.Sheet[x][y].neighbours == 3 {
+				w.Sheet[x][y].NewWorm(x, y, w)
+			}
+		}
+	}
+
+}
+
 // ----------------------------------->
+func (w *World) SumNeighbours() {
+	var neighbours int = 0
+	var xx, yy, xxx, yyy int
+
+	for x, row := range w.Sheet {
+		for y, _ := range row {
+
+			neighbours = 0
+
+			xx = x - 1
+			yy = y - 1
+			xxx = x + 1
+			yyy = y + 1
+
+			if (xx) < 0 {
+				xx = int(w.WorldXSize() - 1)
+			}
+
+			if (yy) < 0 {
+				yy = int(w.WorldYSize() - 1)
+			}
+
+			xxx = xxx % w.WorldXSize()
+			yyy = yyy % w.WorldYSize()
+
+			if w.Sheet[x][yy].IsLive() {
+				neighbours++
+			}
+			if w.Sheet[x][yyy].IsLive() {
+				neighbours++
+			}
+			if w.Sheet[xx][yy].IsLive() {
+				neighbours++
+			}
+			if w.Sheet[xx][y].IsLive() {
+				neighbours++
+			}
+			if w.Sheet[xx][yyy].IsLive() {
+				neighbours++
+			}
+			if w.Sheet[xxx][yy].IsLive() {
+				neighbours++
+			}
+			if w.Sheet[xxx][y].IsLive() {
+				neighbours++
+			}
+			if w.Sheet[xxx][yyy].IsLive() {
+				neighbours++
+			}
+			w.Sheet[x][y].neighbours = int8(neighbours)
+
+		}
+	}
+}
+
+// ----------------------------------->
+func (w Worm) IsLive() bool {
+	return w.live
+}
+
+// ----------------------------------->
+func (w *Worm) KillWorm() {
+	w.live = false
+	w.neighbours = -1
+}
+
+// ----------------------------------->
+func (w Worm) NewWorm(x, y int, world *World) {
+	world.Sheet[x][y].live = true
+	world.Sheet[x][y].neighbours = -1
+}
 
 // ----------------------------------->
 func (w World) WorldXSize() int {
@@ -49,137 +133,4 @@ func (w World) PrintWorld() {
 		}
 		fmt.Println(line)
 	}
-}
-
-// ----------------------------------->
-func (w World) NextGeneration() World {
-	for x, row := range w.Sheet {
-		for y, worm := range row {
-			worm.CheckNeigbours(w)
-			if !worm.WillLive() {
-				worm.Kill()
-			}
-			w.Sheet[x][y] = worm
-			if worm.neighbours == 3 {
-				w.Sheet[x][y].live = true
-				w.Sheet[x][y].neighbours = -1
-				fmt.Println("Urodziny")
-
-			}
-		}
-	}
-	fmt.Println(w)
-	time.Sleep(1 * time.Second)
-	return w
-}
-
-// ----------------------------------->
-func (w *World) PutWormToWorld(worm *Worm) bool {
-
-	if worm.x < w.WorldXSize() && worm.y < w.WorldYSize() {
-		w.Sheet[worm.x][worm.y] = *worm
-	} else {
-		log.Fatalf("World map is too small for worm: %v", *worm)
-	}
-
-	return true
-
-}
-
-// ----------------------------------->
-// ----------------------------------->  WORMS
-// ----------------------------------->
-
-// ----------------------------------->
-func (w *Worm) CheckNeigbours(wrld World) {
-	var neighbours int8 = 0
-	var xx, yy, xxx, yyy int
-
-	//fmt.Println(xx)
-	xx = w.x - 1
-	yy = w.y - 1
-	xxx = w.x + 1
-	yyy = w.y + 1
-	if (xx) < 0 {
-		xx = int(wrld.WorldXSize() - 1)
-	}
-
-	if (yy) < 0 {
-		yy = int(wrld.WorldYSize() - 1)
-	}
-
-	xxx = xxx % wrld.WorldXSize()
-	yyy = yyy % wrld.WorldYSize()
-	//fmt.Println(wrld.Sheet[6][7].live)
-
-	if wrld.Sheet[w.x][yy].live {
-		neighbours++
-	}
-	if wrld.Sheet[w.x][yyy].live {
-		neighbours++
-	}
-	if wrld.Sheet[xx][yy].live {
-		neighbours++
-	}
-	if wrld.Sheet[xx][w.y].live {
-		neighbours++
-	}
-	if wrld.Sheet[xx][yyy].live {
-		neighbours++
-	}
-	if wrld.Sheet[xxx][yy].live {
-		neighbours++
-	}
-	if wrld.Sheet[xxx][w.y].live {
-		neighbours++
-	}
-	if wrld.Sheet[xxx][yyy].live {
-		neighbours++
-	}
-	w.neighbours = neighbours
-}
-
-// ----------------------------------->
-func (w *Worm) WillLive() bool {
-
-	if w.neighbours >= 2 && w.neighbours <= 3 {
-		return true
-	} else {
-		return false
-	}
-}
-
-// ----------------------------------->
-func (w *Worm) IsLive() bool {
-	return w.live
-}
-
-// ----------------------------------->
-func (w *Worm) Print() {
-	opis := "Nie wiem ilu mam sąsiadów."
-	fmt.Println("Cześć, jestem robal")
-	fmt.Printf("Siedzę sobie w norce o współrzędnych: %v, %v \n", w.x, w.y)
-	if w.neighbours > 0 {
-		opis = "Mam " + strconv.FormatUint(uint64(w.neighbours), 10) + " sąsiad/a/ów"
-	} else {
-		if w.neighbours == 0 {
-			opis = "Jestem samotny"
-		} else {
-			opis = "Nie wiem ilu mam sąsiadów"
-		}
-	}
-	fmt.Println(opis)
-}
-
-// ----------------------------------->
-func (w *Worm) Kill() {
-	w.live = false
-}
-
-// ----------------------------------->
-// x,y - coordinates
-// n - amount of neigbours
-func NewWorm(x, y int, n int8) *Worm {
-	//True - worm is live
-	return &Worm{x, y, n, true}
 }
