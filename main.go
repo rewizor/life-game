@@ -6,7 +6,7 @@ import (
 	"os/exec"
 	"time"
 
-	"github.com/rewizor/life/worm"
+	"github.com/rewizor/life-game/worm"
 )
 
 // ----------------------------------->
